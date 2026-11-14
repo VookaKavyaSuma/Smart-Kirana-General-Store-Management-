@@ -179,7 +179,8 @@ npx playwright test
    - **Build Command**: `npm run build`
    - **Output Directory**: `dist`
 4. Add Environment Variable:
-   - `VITE_API_BASE_URL`: `https://your-backend-api.onrender.com/api/v1`
+   - `VITE_API_URL`: `https://smart-kirana-general-store-management.onrender.com/api`
+   - `VITE_API_BASE_URL`: `https://smart-kirana-general-store-management.onrender.com/api/v1`
 5. Click **Deploy**. Vercel will automatically configure SPA redirects via `frontend/vercel.json`.
 
 ### B. Deploy Backend on Render

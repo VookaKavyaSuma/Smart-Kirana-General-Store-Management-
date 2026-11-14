@@ -2,11 +2,12 @@ import { Request, Response } from 'express';
 import { AuthService } from '../services/auth.service.js';
 import { AuthenticatedRequest, SESSION_COOKIE_NAME } from '../middlewares/auth.middleware.js';
 
+const isProd = process.env.NODE_ENV === 'production';
 // Cookie configuration for long-lived multi-device session (FR-1.8)
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProd,
+  sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax',
   maxAge: 10 * 365 * 24 * 60 * 60 * 1000, // 10 years (never expires until logout)
   path: '/',
 };

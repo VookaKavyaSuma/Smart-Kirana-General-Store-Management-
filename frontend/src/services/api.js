@@ -1,10 +1,39 @@
-const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const rawBase =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://smart-kirana-general-store-management.onrender.com/api';
+
+// Normalize: remove trailing slash and optional trailing /v1
+export const BASE_URL = rawBase.replace(/\/+$/, '').replace(/\/v1$/, '');
+
+/**
+ * Helper to resolve static/uploaded media URLs (shop photos, bill previews, item images)
+ * to full URLs pointing to the deployed backend if not already absolute.
+ */
+export function getMediaUrl(path) {
+  if (!path) return '';
+  if (
+    path.startsWith('http://') ||
+    path.startsWith('https://') ||
+    path.startsWith('data:') ||
+    path.startsWith('blob:')
+  ) {
+    return path;
+  }
+  const origin = BASE_URL.startsWith('http')
+    ? new URL(BASE_URL).origin
+    : 'https://smart-kirana-general-store-management.onrender.com';
+  return `${origin}${path.startsWith('/') ? path : '/' + path}`;
+}
 
 export async function apiRequest(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
   
+  const token = typeof window !== 'undefined' ? localStorage.getItem('kirana_token') : null;
+
   const headers = {
     'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
 
@@ -41,29 +70,49 @@ export const authApi = {
       body: JSON.stringify({ mobileNumber, purpose }),
     }),
 
-  register: (payload) =>
-    apiRequest('/v1/auth/register', {
+  register: async (payload) => {
+    const data = await apiRequest('/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify(payload),
-    }),
+    });
+    if (data.sessionToken && typeof window !== 'undefined') {
+      localStorage.setItem('kirana_token', data.sessionToken);
+    }
+    return data;
+  },
 
-  login: (payload) =>
-    apiRequest('/v1/auth/login', {
+  login: async (payload) => {
+    const data = await apiRequest('/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify(payload),
-    }),
+    });
+    if (data.sessionToken && typeof window !== 'undefined') {
+      localStorage.setItem('kirana_token', data.sessionToken);
+    }
+    return data;
+  },
 
   getMe: () => apiRequest('/v1/auth/me'),
 
-  logout: () =>
-    apiRequest('/v1/auth/logout', {
-      method: 'POST',
-    }),
+  logout: async () => {
+    try {
+      return await apiRequest('/v1/auth/logout', { method: 'POST' });
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kirana_token');
+      }
+    }
+  },
 
-  logoutAll: () =>
-    apiRequest('/v1/auth/logout-all', {
-      method: 'POST',
-    }),
+  logoutAll: async () => {
+    try {
+      return await apiRequest('/v1/auth/logout-all', { method: 'POST' });
+    } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kirana_token');
+      }
+    }
+  },
 
   getDevices: () => apiRequest('/v1/auth/devices'),
 
