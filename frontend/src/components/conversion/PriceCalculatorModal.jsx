@@ -59,8 +59,8 @@ export default function PriceCalculatorModal({ isOpen, onClose, initialItem = nu
   const subLabel = isLitre ? 'ml' : 'g';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 my-8">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start p-4 pt-5 sm:pt-6 pb-12 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 mb-8">
         {/* Header */}
         <div className="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-2.5">

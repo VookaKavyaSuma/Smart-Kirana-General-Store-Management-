@@ -12,16 +12,22 @@ test.describe('Smart Kirana - End-to-End Test Suite (Phase 12)', () => {
 
   async function ensureLoggedIn(page: any) {
     await page.goto('/');
+    await page.waitForTimeout(500);
+
     const loginSwitch = page.locator('button:has-text("Already have an account"), button:has-text("ఇప్పటికే ఖాతా ఉందా")').first();
-    if (await loginSwitch.isVisible({ timeout: 1500 }).catch(() => false)) {
+    if (await loginSwitch.isVisible().catch(() => false)) {
       await loginSwitch.click();
+      await page.waitForTimeout(300);
     }
+
     const userField = page.locator('input[placeholder*="srilakshmistores"]');
-    if (await userField.isVisible({ timeout: 2500 }).catch(() => false)) {
+    if (await userField.isVisible().catch(() => false)) {
       await userField.fill(expectedUsername);
       await page.locator('input[type="password"]').first().fill(newPassword);
       await page.locator('form button:has-text("Log In"), form button:has-text("లాగిన్")').first().click();
       await expect(page.getByText(shopName).first()).toBeVisible({ timeout: 12000 });
+    } else {
+      await expect(page.getByText(shopName).first()).toBeVisible({ timeout: 8000 });
     }
   }
 
