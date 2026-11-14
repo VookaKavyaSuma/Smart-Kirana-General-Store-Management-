@@ -290,40 +290,38 @@ export class AuthService {
           where: { username: normalized },
         });
 
-        if (!store) {
-          return { success: false, error: 'Wrong user name or password.' };
-        }
+        if (store) {
+          const isPasswordValid = await bcrypt.compare(password, store.passwordHash);
+          if (!isPasswordValid) {
+            return { success: false, error: 'Wrong user name or password.' };
+          }
 
-        const isPasswordValid = await bcrypt.compare(password, store.passwordHash);
-        if (!isPasswordValid) {
-          return { success: false, error: 'Wrong user name or password.' };
-        }
+          // Create new session record for this device (FR-1.9: many devices at once)
+          await prisma.session.create({
+            data: {
+              storeId: store.id,
+              sessionToken,
+              deviceName,
+              ipAddress: ipAddress || null,
+            },
+          });
 
-        // Create new session record for this device (FR-1.9: many devices at once)
-        await prisma.session.create({
-          data: {
-            storeId: store.id,
+          return {
+            success: true,
+            store: {
+              id: store.id,
+              shopName: store.shopName,
+              username: store.username,
+              mobileNumber: store.mobileNumber,
+              language: store.language as 'EN' | 'TE',
+              shopPhotoUrl: store.shopPhotoUrl,
+              lowStockThreshold: Number(store.lowStockThreshold),
+              dailyReminderEnabled: store.dailyReminderEnabled,
+              createdAt: store.createdAt,
+            },
             sessionToken,
-            deviceName,
-            ipAddress: ipAddress || null,
-          },
-        });
-
-        return {
-          success: true,
-          store: {
-            id: store.id,
-            shopName: store.shopName,
-            username: store.username,
-            mobileNumber: store.mobileNumber,
-            language: store.language as 'EN' | 'TE',
-            shopPhotoUrl: store.shopPhotoUrl,
-            lowStockThreshold: Number(store.lowStockThreshold),
-            dailyReminderEnabled: store.dailyReminderEnabled,
-            createdAt: store.createdAt,
-          },
-          sessionToken,
-        };
+          };
+        }
       } catch (err: any) {
         console.error('Prisma login error, falling back to memory store:', err.message);
       }
@@ -568,11 +566,13 @@ export class AuthService {
             mobileNumber,
           },
         });
-        storeExists = !!store;
+        if (store) storeExists = true;
       } catch (err: any) {
         console.error('Prisma forgot password check error:', err.message);
       }
-    } else {
+    }
+
+    if (!storeExists) {
       storeExists = Array.from(memoryStores.values()).some(
         (s) => s.username === normalizedUsername && s.mobileNumber === mobileNumber
       );
@@ -621,22 +621,20 @@ export class AuthService {
           where: { username: normalizedUsername, mobileNumber },
         });
 
-        if (!store) {
-          return { success: false, error: 'Account not found.' };
+        if (store) {
+          await prisma.store.update({
+            where: { id: store.id },
+            data: { passwordHash },
+          });
+
+          if (logoutAllDevices) {
+            await this.logoutAll(store.id);
+          }
+
+          return { success: true };
         }
-
-        await prisma.store.update({
-          where: { id: store.id },
-          data: { passwordHash },
-        });
-
-        if (logoutAllDevices) {
-          await this.logoutAll(store.id);
-        }
-
-        return { success: true };
       } catch (err: any) {
-        console.error('Prisma resetPassword error:', err.message);
+        console.error('Prisma resetPassword error, falling back to memory store:', err.message);
       }
     }
 

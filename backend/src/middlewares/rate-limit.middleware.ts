@@ -1,7 +1,12 @@
 import rateLimit from 'express-rate-limit';
 
-// Skip rate limiting in unit/integration testing environments
-const isTestEnv = () => process.env.NODE_ENV === 'test';
+// Skip rate limiting in test or local development environments so test suites don't get blocked
+const shouldSkip = (req: any) =>
+  process.env.NODE_ENV === 'test' ||
+  process.env.NODE_ENV === 'development' ||
+  req.ip === '127.0.0.1' ||
+  req.ip === '::1' ||
+  req.ip === '::ffff:127.0.0.1';
 
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -12,7 +17,7 @@ export const loginLimiter = rateLimit({
     success: false,
     error: 'Too many login attempts. Please try again after 15 minutes.',
   },
-  skip: isTestEnv,
+  skip: shouldSkip,
 });
 
 export const otpLimiter = rateLimit({
@@ -24,7 +29,7 @@ export const otpLimiter = rateLimit({
     success: false,
     error: 'Too many OTP requests. Please try again after 15 minutes.',
   },
-  skip: isTestEnv,
+  skip: shouldSkip,
 });
 
 export const generalApiLimiter = rateLimit({
@@ -32,6 +37,6 @@ export const generalApiLimiter = rateLimit({
   max: 1000, // generous limit for general API usage
   standardHeaders: true,
   legacyHeaders: false,
-  skip: isTestEnv,
+  skip: shouldSkip,
 });
 

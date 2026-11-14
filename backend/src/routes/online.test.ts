@@ -31,7 +31,7 @@ describe('Smart Kirana - Phase 9: Online Payments & Daily Entry (FR-11)', () => 
 
     // Create a test supplier
     const supRes = await SupplierService.createSupplier(regRes.store!.id, 'Sri Balaji Wholesale');
-    testSupplierId = supRes.supplier.id;
+    testSupplierId = supRes.supplier!.id;
   });
 
   describe('Daily Entry Rule & Discrepancy Warning (FR-11.1, FR-11.3)', () => {

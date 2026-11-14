@@ -43,9 +43,9 @@ describe('Smart Kirana - Phase 11: Suggested Items & 3 Lists (FR-9)', () => {
 
     // Setup 2 Suppliers
     const supA = await SupplierService.createSupplier(storeId, 'Wholesaler A');
-    supplierAId = supA.supplier.id;
+    supplierAId = supA.supplier!.id;
     const supB = await SupplierService.createSupplier(storeId, 'Wholesaler B');
-    supplierBId = supB.supplier.id;
+    supplierBId = supB.supplier!.id;
   });
 
   it('exposes weights configuration in config endpoint (FR-9.2)', async () => {

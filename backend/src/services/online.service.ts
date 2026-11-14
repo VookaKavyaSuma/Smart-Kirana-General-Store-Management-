@@ -85,7 +85,9 @@ interface InMemorySupplierPayment {
 }
 
 export const memoryDailyEntries = new Map<string, InMemoryDailyOnlineEntry>();
+export const memoryDailyOnlineEntries = memoryDailyEntries;
 export const memorySupplierPayments = new Map<string, InMemorySupplierPayment>();
+export { memoryOnlineTransactions } from './credit.service.js';
 
 export class OnlineService {
   /**

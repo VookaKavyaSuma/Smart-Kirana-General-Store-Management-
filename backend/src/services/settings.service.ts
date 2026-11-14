@@ -316,7 +316,6 @@ export class SettingsService {
 
         bills = await prisma.billFile.findMany({
           where: { storeId },
-          include: { supplier: true },
           orderBy: { billDate: 'desc' },
         });
       } catch (err: any) {

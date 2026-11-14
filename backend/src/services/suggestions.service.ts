@@ -356,7 +356,7 @@ export class SuggestionsService {
       .filter(
         (i) =>
           (i.unitsSoldPerWeek >= SUGGESTIONS_CONFIG.THRESHOLDS.FAST_SELLING_VELOCITY || i.unitsSoldInPeriod > 0) &&
-          (i.quantityRemaining <= lowStockThreshold || (i.stockRunoutDays !== null && i.stockRunoutDays <= 14))
+          (i.quantityRemaining <= lowStockThreshold || (i.stockRunoutDays != null && i.stockRunoutDays <= 14))
       )
       .sort((a, b) => (a.stockRunoutDays ?? 999) - (b.stockRunoutDays ?? 999))
       .map((item) => ({
