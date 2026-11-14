@@ -13,3 +13,4 @@ creditRouter.get('/:id', CreditController.getCustomer);
 creditRouter.post('/:id/entries', CreditController.addCreditEntry);
 creditRouter.delete('/:id/entries/:entryId', CreditController.deleteCreditEntry);
 creditRouter.post('/:id/payments', CreditController.recordPayment);
+
