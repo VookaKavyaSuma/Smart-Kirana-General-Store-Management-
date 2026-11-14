@@ -40,6 +40,7 @@ test.describe('Smart Kirana - End-to-End Test Suite (Phase 12)', () => {
   }
 
   test('1. Register new store and login with case-insensitive username (FR-1.1 to FR-1.6)', async ({ page }) => {
+    await page.context().clearCookies();
     await page.goto('/');
 
     // Switch to Register form if on Login
