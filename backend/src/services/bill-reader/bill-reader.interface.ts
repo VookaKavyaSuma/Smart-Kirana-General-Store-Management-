@@ -4,3 +4,4 @@ export interface IBillReader {
   readonly name: string;
   readBill(filePath: string, fileType: string): Promise<ExtractedBill>;
 }
+

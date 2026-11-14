@@ -568,3 +568,4 @@ export default function BillReviewModal({ isOpen, onClose, bill, onConfirmed }) 
     </div>
   );
 }
+
