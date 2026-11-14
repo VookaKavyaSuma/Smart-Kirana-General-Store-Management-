@@ -11,3 +11,4 @@ searchRouter.get('/suggestions', SearchController.getSuggestions);
 searchRouter.post('/history', SearchController.recordSearchHistory);
 searchRouter.delete('/suggestions/:id', SearchController.deleteSuggestion);
 searchRouter.post('/voice-command', SearchController.handleVoiceCommand);
+

@@ -57,3 +57,4 @@ describe('Smart Kirana - Fuzzy & Trigram Search Utility (FR-7.5)', () => {
     expect(teluguRes.score).toBeGreaterThanOrEqual(0.9);
   });
 });
+

@@ -294,3 +294,4 @@ describe('Smart Kirana - Phase 6: Search with Suggestions & Voice Commands (FR-7
     });
   });
 });
+

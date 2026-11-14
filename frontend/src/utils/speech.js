@@ -101,3 +101,4 @@ export function speakText(text, language = 'en') {
     console.warn('[SPEECH SYNTHESIS ERROR]:', err);
   }
 }
+

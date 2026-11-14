@@ -331,3 +331,4 @@ export default function GlobalSearchBar({ onSelectItem, onTriggerAddItem }) {
     </div>
   );
 }
+

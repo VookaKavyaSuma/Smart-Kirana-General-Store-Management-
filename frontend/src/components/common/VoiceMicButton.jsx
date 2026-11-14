@@ -68,3 +68,4 @@ export default function VoiceMicButton({ onTranscript, title = 'Voice Input', cl
     </button>
   );
 }
+

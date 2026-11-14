@@ -119,3 +119,4 @@ export function matchScore(target: string, query: string): { matches: boolean; s
 
   return { matches: false, score: 0 };
 }
+
