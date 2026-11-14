@@ -1,13 +1,27 @@
 {
-  "name": "frontend",
+  "name": "smart-kirana",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Smart Kirana & General Store Management System",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test": "npm --prefix backend test",
+    "test:watch": "npm --prefix backend run test:watch",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:push": "npm --prefix backend run prisma:push"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "keywords": [
+    "kirana",
+    "store-management",
+    "telugu",
+    "bilingual",
+    "react",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Vooka Kavya Suma",
+  "license": "ISC"
 }

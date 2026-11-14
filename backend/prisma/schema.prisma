@@ -1,0 +1,354 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Language {
+  EN
+  TE
+}
+
+enum ItemUnit {
+  KG
+  G
+  LITRE
+  ML
+  PIECE
+  PACKET
+}
+
+enum PurchaseType {
+  ONLINE
+  SHOP
+}
+
+enum BillStatus {
+  PENDING_REVIEW
+  CONFIRMED
+  FAILED
+}
+
+enum PaymentMode {
+  CASH
+  ONLINE
+}
+
+enum OtpPurpose {
+  REGISTRATION
+  FORGOT_PASSWORD
+  CHANGE_MOBILE
+  DELETE_ACCOUNT
+}
+
+// ----------------------------------------------------
+// 1. Store (Account) & Sessions
+// ----------------------------------------------------
+
+model Store {
+  id                   String              @id @default(uuid())
+  shopName             String              @map("shop_name")
+  username             String              @unique // Stored lowercase, spaces stripped
+  passwordHash         String              @map("password_hash")
+  mobileNumber         String              @unique @map("mobile_number")
+  language             Language            @default(TE)
+  shopPhotoUrl         String?             @map("shop_photo_url")
+  lowStockThreshold    Decimal             @default(5.000) @map("low_stock_threshold") @db.Decimal(10, 3)
+  dailyReminderEnabled Boolean             @default(true) @map("daily_reminder_enabled")
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @updatedAt @map("updated_at")
+
+  sessions             Session[]
+  suppliers            Supplier[]
+  items                Item[]
+  purchases            Purchase[]
+  bills                BillFile[]
+  searchHistories      SearchHistory[]
+  customers            Customer[]
+  dailyOnlineEntries   DailyOnlineEntry[]
+  onlineTransactions   OnlineTransaction[]
+  supplierPayments     SupplierPayment[]
+
+  @@index([username])
+  @@index([mobileNumber])
+  @@map("stores")
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  storeId      String    @map("store_id")
+  sessionToken String    @unique @map("session_token") // Secure random token
+  deviceName   String    @map("device_name") // User agent / Device description
+  ipAddress    String?   @map("ip_address")
+  isRevoked    Boolean   @default(false) @map("is_revoked")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastUsedAt   DateTime  @default(now()) @map("last_used_at")
+
+  store        Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@index([sessionToken])
+  @@index([storeId])
+  @@map("sessions")
+}
+
+model OtpVerification {
+  id           String      @id @default(uuid())
+  mobileNumber String      @map("mobile_number")
+  codeHash     String      @map("code_hash")
+  purpose      OtpPurpose
+  attempts     Int         @default(0) // Max 5 wrong attempts
+  isUsed       Boolean     @default(false) @map("is_used")
+  expiresAt    DateTime    @map("expires_at") // 10 minutes
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  @@index([mobileNumber, purpose])
+  @@map("otp_verifications")
+}
+
+// ----------------------------------------------------
+// 2. Suppliers, Items & Purchases (Foundations)
+// ----------------------------------------------------
+
+model Supplier {
+  id               String            @id @default(uuid())
+  storeId          String            @map("store_id")
+  shopName         String            @map("shop_name")
+  phone            String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  store            Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  items            Item[]
+  purchases        Purchase[]
+  supplierPayments SupplierPayment[]
+
+  @@unique([storeId, shopName])
+  @@index([storeId])
+  @@map("suppliers")
+}
+
+model Item {
+  id                  String            @id @default(uuid())
+  storeId             String            @map("store_id")
+  supplierId          String?           @map("supplier_id")
+  name                String
+  category            String
+  unit                ItemUnit
+  photoUrl            String?           @map("photo_url")
+  currentCostPrice    Decimal           @map("current_cost_price") @db.Decimal(12, 2)
+  currentSellingPrice Decimal           @map("current_selling_price") @db.Decimal(12, 2)
+  quantityPurchased   Decimal           @default(0.000) @map("quantity_purchased") @db.Decimal(10, 3)
+  quantityRemaining   Decimal           @default(0.000) @map("quantity_remaining") @db.Decimal(10, 3)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  store               Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier            Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  purchaseItems       PurchaseItem[]
+  stockAdjustments    StockAdjustment[]
+  creditEntries       CreditEntry[]
+
+  @@index([storeId, name])
+  @@index([storeId, supplierId])
+  @@map("items")
+}
+
+model Purchase {
+  id               String            @id @default(uuid())
+  storeId          String            @map("store_id")
+  supplierId       String?           @map("supplier_id")
+  billFileId       String?           @unique @map("bill_file_id")
+  purchaseDate     DateTime          @map("purchase_date")
+  type             PurchaseType      @default(SHOP)
+  totalAmount      Decimal           @map("total_amount") @db.Decimal(12, 2)
+  note             String?
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  store            Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier         Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  billFile         BillFile?         @relation(fields: [billFileId], references: [id], onDelete: SetNull)
+  items            PurchaseItem[]
+  supplierPayments SupplierPayment[]
+
+  @@index([storeId, purchaseDate])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id           String    @id @default(uuid())
+  purchaseId   String    @map("purchase_id")
+  itemId       String    @map("item_id")
+  quantity     Decimal   @db.Decimal(10, 3)
+  unit         ItemUnit
+  costPrice    Decimal   @map("cost_price") @db.Decimal(12, 2)
+  sellingPrice Decimal   @map("selling_price") @db.Decimal(12, 2)
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  purchase     Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  item         Item      @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([purchaseId])
+  @@index([itemId])
+  @@map("purchase_items")
+}
+
+model StockAdjustment {
+  id           String    @id @default(uuid())
+  itemId       String    @map("item_id")
+  date         DateTime  @default(now())
+  unitsChanged Decimal   @map("units_changed") @db.Decimal(10, 3)
+  reason       String
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  item         Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, date])
+  @@map("stock_adjustments")
+}
+
+model BillFile {
+  id            String       @id @default(uuid())
+  storeId       String       @map("store_id")
+  filePath      String       @map("file_path")
+  fileType      String       @map("file_type")
+  billType      PurchaseType @default(SHOP) @map("bill_type")
+  billNumber    String?      @map("bill_number")
+  billDate      DateTime?    @map("bill_date")
+  supplierName  String?      @map("supplier_name")
+  totalAmount   Decimal?     @map("total_amount") @db.Decimal(12, 2)
+  extractedData Json?        @map("extracted_data")
+  status        BillStatus   @default(PENDING_REVIEW)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  store         Store        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  purchase      Purchase?
+
+  @@index([storeId, billType])
+  @@map("bill_files")
+}
+
+model SearchHistory {
+  id             String    @id @default(uuid())
+  storeId        String    @map("store_id")
+  searchWord     String    @map("search_word")
+  count          Int       @default(1)
+  lastSearchedAt DateTime  @default(now()) @map("last_searched_at")
+
+  store          Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, searchWord])
+  @@index([storeId, count(sort: Desc)])
+  @@map("search_histories")
+}
+
+model Customer {
+  id            String          @id @default(uuid())
+  storeId       String          @map("store_id")
+  name          String
+  mobileNumber  String?         @map("mobile_number")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  store         Store           @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  creditEntries CreditEntry[]
+  payments      CreditPayment[]
+
+  @@index([storeId, name])
+  @@map("customers")
+}
+
+model CreditEntry {
+  id           String    @id @default(uuid())
+  customerId   String    @map("customer_id")
+  itemId       String?   @map("item_id")
+  itemName     String    @map("item_name")
+  quantity     Decimal   @db.Decimal(10, 3)
+  costPrice    Decimal   @map("cost_price") @db.Decimal(12, 2)
+  sellingPrice Decimal   @map("selling_price") @db.Decimal(12, 2)
+  totalAmount  Decimal   @map("total_amount") @db.Decimal(12, 2)
+  dateTaken    DateTime  @default(now()) @map("date_taken")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  customer     Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  item         Item?     @relation(fields: [itemId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@map("credit_entries")
+}
+
+model CreditPayment {
+  id                String             @id @default(uuid())
+  customerId        String             @map("customer_id")
+  amount            Decimal            @db.Decimal(12, 2)
+  date              DateTime           @default(now())
+  mode              PaymentMode        @default(CASH)
+  referenceNumber   String?            @map("reference_number")
+  note              String?
+  createdAt         DateTime           @default(now()) @map("created_at")
+
+  customer          Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  onlineTransaction OnlineTransaction?
+
+  @@index([customerId])
+  @@map("credit_payments")
+}
+
+model DailyOnlineEntry {
+  id          String   @id @default(uuid())
+  storeId     String   @map("store_id")
+  date        DateTime @db.Date
+  totalAmount Decimal  @map("total_amount") @db.Decimal(12, 2)
+  note        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, date])
+  @@index([storeId, date])
+  @@map("daily_online_entries")
+}
+
+model OnlineTransaction {
+  id              String         @id @default(uuid())
+  storeId         String         @map("store_id")
+  creditPaymentId String?        @unique @map("credit_payment_id")
+  dateTime        DateTime       @default(now()) @map("date_time")
+  amount          Decimal        @db.Decimal(12, 2)
+  fromCustomer    String?        @map("from_customer")
+  referenceNumber String?        @map("reference_number")
+  note            String?
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  store           Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  creditPayment   CreditPayment? @relation(fields: [creditPaymentId], references: [id], onDelete: SetNull)
+
+  @@index([storeId, dateTime])
+  @@map("online_transactions")
+}
+
+model SupplierPayment {
+  id              String    @id @default(uuid())
+  storeId         String    @map("store_id")
+  supplierId      String    @map("supplier_id")
+  purchaseId      String?   @map("purchase_id")
+  amount          Decimal   @db.Decimal(12, 2)
+  date            DateTime  @default(now())
+  referenceNumber String?   @map("reference_number")
+  note            String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  store           Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  supplier        Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  purchase        Purchase? @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+
+  @@index([storeId, supplierId])
+  @@index([storeId, date])
+  @@map("supplier_payments")
+}
+

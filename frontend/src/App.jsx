@@ -1,122 +1,122 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
+import Navbar from './components/common/Navbar';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import DashboardPreview from './pages/DashboardPreview';
+import ItemsListPage from './pages/items/ItemsListPage';
+import SuppliersListPage from './pages/suppliers/SuppliersListPage';
+import SupplierDetailPage from './pages/suppliers/SupplierDetailPage';
+import PurchasesListPage from './pages/purchases/PurchasesListPage';
+import BillsListPage from './pages/bills/BillsListPage';
+import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
+import { Store } from 'lucide-react';
 
-function App() {
-  const [count, setCount] = useState(0)
+function MainApp() {
+  const { store, loading } = useAuth();
+  const [authView, setAuthView] = useState('login'); // 'login' | 'register'
+  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard' | 'items' | 'purchases' | 'suppliers' | 'supplier-detail'
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
 
+  // Conversion calculator modal state (FR-4)
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [calculatorItem, setCalculatorItem] = useState(null);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="w-14 h-14 rounded-3xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30 mb-4 animate-bounce">
+          <Store className="w-7 h-7" />
+        </div>
+        <p className="text-sm font-semibold text-slate-700">Loading Smart Kirana...</p>
+        <p className="text-xs text-slate-400 mt-1">స్మార్ట్ కిరాణా లోడ్ అవుతోంది...</p>
+      </div>
+    );
+  }
+
+  // Not logged in: show Login or Register page
+  if (!store) {
+    if (authView === 'register') {
+      return <RegisterPage onNavigateToLogin={() => setAuthView('login')} />;
+    }
+    return <LoginPage onNavigateToRegister={() => setAuthView('register')} />;
+  }
+
+  const handleOpenCalculator = (item = null) => {
+    setCalculatorItem(item);
+    setIsCalculatorOpen(true);
+  };
+
+  // Logged in: main app interface
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-slate-100/70 pb-16 flex flex-col">
+      <Navbar
+        currentTab={currentTab}
+        onSelectTab={(tab) => setCurrentTab(tab)}
+        onOpenCalculator={() => handleOpenCalculator(null)}
+      />
 
-      <div className="ticks"></div>
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-1">
+        {currentTab === 'dashboard' && (
+          <DashboardPreview onNavigateTab={(tab) => setCurrentTab(tab)} />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {currentTab === 'items' && (
+          <ItemsListPage
+            onOpenSupplierDetail={(supplierId) => {
+              setSelectedSupplierId(supplierId);
+              setCurrentTab('supplier-detail');
+            }}
+            onOpenCalculatorForItem={(item) => handleOpenCalculator(item)}
+          />
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {currentTab === 'purchases' && (
+          <PurchasesListPage />
+        )}
+
+        {currentTab === 'bills' && (
+          <BillsListPage />
+        )}
+
+        {currentTab === 'suppliers' && (
+          <SuppliersListPage
+            onSelectSupplier={(supplierId) => {
+              setSelectedSupplierId(supplierId);
+              setCurrentTab('supplier-detail');
+            }}
+          />
+        )}
+
+        {currentTab === 'supplier-detail' && (
+          <SupplierDetailPage
+            supplierId={selectedSupplierId}
+            onBack={() => setCurrentTab('suppliers')}
+            onAddItemForSupplier={() => setCurrentTab('items')}
+          />
+        )}
+      </main>
+
+      {/* Global 2-Way Conversion Calculator & Ready Price Chart Modal (FR-4) */}
+      <PriceCalculatorModal
+        isOpen={isCalculatorOpen}
+        onClose={() => {
+          setIsCalculatorOpen(false);
+          setCalculatorItem(null);
+        }}
+        initialItem={calculatorItem}
+      />
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </LanguageProvider>
+  );
+}
