@@ -238,6 +238,19 @@ export const translations = {
     billReviewSuccess: "Purchase recorded and stock quantities successfully updated!",
     manualEntryHelp: "You can freely edit supplier, date, line items, and quantities before confirming.",
 
+    // Phase 6: Search & Voice (FR-7, FR-2.4 to FR-2.7)
+    searchItemsPlaceholder: "Search items in English or తెలుగు...",
+    voiceSearch: "Voice Search",
+    listening: "Listening...",
+    speakNow: "Speak now...",
+    voiceAssistant: "Voice Assistant",
+    frequentSearches: "Frequent Searches",
+    noItemsFoundFor: "No items found matching",
+    voiceHelpHint: "Try saying: 'search rice', 'how much sugar is left', 'add item', or 'profit this month'.",
+    deleteSuggestion: "Delete from search history",
+    inStockCount: "in stock",
+    searchFrequency: "searches",
+
     // Common Buttons
     save: "Save",
     saving: "Saving...",
@@ -483,6 +496,19 @@ export const translations = {
     viewExtractedReview: "సమీక్షించి నిర్ధారించండి",
     billReviewSuccess: "కొనుగోలు నమోదైంది మరియు స్టాక్ విజయవంతంగా అప్‌డేట్ చేయబడింది!",
     manualEntryHelp: "నిర్ధారించడానికి ముందు మీరు సరఫరాదారు, తేదీ, వస్తువులు మరియు పరిమాణాలను సులభంగా సవరించవచ్చు.",
+
+    // Phase 6: Search & Voice (FR-7, FR-2.4 to FR-2.7)
+    searchItemsPlaceholder: "ఇంగ్లీష్ లేదా తెలుగులో వెతకండి...",
+    voiceSearch: "వాయిస్ శోధన",
+    listening: "వింటోంది...",
+    speakNow: "ఇప్పుడు మాట్లాడండి...",
+    voiceAssistant: "వాయిస్ సహాయకుడు",
+    frequentSearches: "తరచుగా వెతికినవి",
+    noItemsFoundFor: "సరిపోలే వస్తువులు ఏవీ దొరకలేదు",
+    voiceHelpHint: "ఉదా: 'search rice', 'చక్కెర ఎంత ఉంది', 'వస్తువును జోడించు', 'ఈ నెల లాభం'.",
+    deleteSuggestion: "శోధన చరిత్ర నుండి తొలగించు",
+    inStockCount: "స్టాక్‌లో ఉంది",
+    searchFrequency: "సార్లు వెతికారు",
 
     // Common Buttons
     save: "భద్రపరచు",

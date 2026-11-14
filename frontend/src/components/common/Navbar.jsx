@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import LanguageToggle from '../LanguageToggle';
+import GlobalSearchBar from './GlobalSearchBar';
 import {
   Store,
   Package,
@@ -13,16 +14,22 @@ import {
   LogOut,
 } from 'lucide-react';
 
-export default function Navbar({ currentTab, onSelectTab, onOpenCalculator }) {
+export default function Navbar({
+  currentTab,
+  onSelectTab,
+  onOpenCalculator,
+  onSelectItem,
+  onTriggerAddItem,
+}) {
   const { store, logout } = useAuth();
   const { t } = useLanguage();
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3">
+        <div className="flex items-center justify-between py-3 gap-2 sm:gap-4">
           {/* Logo & Store Info */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <div
               onClick={() => onSelectTab('dashboard')}
               className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 cursor-pointer"
@@ -47,15 +54,23 @@ export default function Navbar({ currentTab, onSelectTab, onOpenCalculator }) {
             </div>
           </div>
 
+          {/* Center: Global Search Bar on Desktop & Tablet (FR-7.1, FR-2.4) */}
+          <div className="hidden sm:block flex-1 max-w-md mx-2">
+            <GlobalSearchBar
+              onSelectItem={onSelectItem || onOpenCalculator}
+              onTriggerAddItem={onTriggerAddItem || (() => onSelectTab('items'))}
+            />
+          </div>
+
           {/* Right: Calculator, Language & Logout */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <button
               onClick={onOpenCalculator}
               title={t('calculator')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
             >
               <Calculator className="w-4 h-4 text-emerald-600" />
-              <span className="hidden sm:inline">{t('calculator')}</span>
+              <span className="hidden md:inline">{t('calculator')}</span>
             </button>
 
             <LanguageToggle />
@@ -66,9 +81,17 @@ export default function Navbar({ currentTab, onSelectTab, onOpenCalculator }) {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/80 transition-colors cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('logout')}</span>
+              <span className="hidden md:inline">{t('logout')}</span>
             </button>
           </div>
+        </div>
+
+        {/* Global Search Bar on Mobile Screen (FR-7.1, FR-2.4) */}
+        <div className="sm:hidden pb-3 pt-1 border-t border-slate-100/70">
+          <GlobalSearchBar
+            onSelectItem={onSelectItem || onOpenCalculator}
+            onTriggerAddItem={onTriggerAddItem || (() => onSelectTab('items'))}
+          />
         </div>
 
         {/* Navigation Tabs */}

@@ -249,4 +249,36 @@ export const billApi = {
     }),
 };
 
+export const searchApi = {
+  search: (q) => {
+    const query = new URLSearchParams();
+    if (q) query.append('q', q);
+    return apiRequest(`/v1/search?${query.toString()}`);
+  },
+
+  getSuggestions: (q) => {
+    const query = new URLSearchParams();
+    if (q) query.append('q', q);
+    return apiRequest(`/v1/search/suggestions?${query.toString()}`);
+  },
+
+  recordHistory: (searchWord, itemId) =>
+    apiRequest('/v1/search/history', {
+      method: 'POST',
+      body: JSON.stringify({ searchWord, itemId }),
+    }),
+
+  deleteSuggestion: (id) =>
+    apiRequest(`/v1/search/suggestions/${id}`, {
+      method: 'DELETE',
+    }),
+
+  voiceCommand: (command, language = 'en') =>
+    apiRequest('/v1/search/voice-command', {
+      method: 'POST',
+      body: JSON.stringify({ command, language }),
+    }),
+};
+
+
 

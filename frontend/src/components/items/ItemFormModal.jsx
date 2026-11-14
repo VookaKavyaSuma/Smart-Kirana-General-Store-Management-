@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { compressImage } from '../../utils/imageCompressor';
 import { itemApi, supplierApi } from '../../services/api';
+import VoiceMicButton from '../common/VoiceMicButton';
 import {
   X,
   Upload,
@@ -276,9 +277,16 @@ export default function ItemFormModal({ isOpen, onClose, onItemSaved, editItem =
 
           {/* Item Name (Telugu or English FR-3.1) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              {t('itemName')} <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                {t('itemName')} <span className="text-rose-500">*</span>
+              </label>
+              <VoiceMicButton
+                onTranscript={(txt) => setName(txt)}
+                size="sm"
+                title="Speak item name"
+              />
+            </div>
             <input
               type="text"
               value={name}
@@ -341,9 +349,21 @@ export default function ItemFormModal({ isOpen, onClose, onItemSaved, editItem =
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                {editItem ? t('quantityRemaining') : t('quantity')} <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  {editItem ? t('quantityRemaining') : t('quantity')} <span className="text-rose-500">*</span>
+                </label>
+                {!editItem && (
+                  <VoiceMicButton
+                    onTranscript={(txt) => {
+                      const num = parseFloat(txt.replace(/[^0-9.]/g, ''));
+                      if (!isNaN(num)) setQuantity(String(num));
+                    }}
+                    size="sm"
+                    title="Speak quantity"
+                  />
+                )}
+              </div>
               <input
                 type="number"
                 step="0.001"
@@ -361,9 +381,19 @@ export default function ItemFormModal({ isOpen, onClose, onItemSaved, editItem =
           {/* Pricing: CP and SP with Live Profit Metrics */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                {t('costPrice')} (₹) <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  {t('costPrice')} (₹) <span className="text-rose-500">*</span>
+                </label>
+                <VoiceMicButton
+                  onTranscript={(txt) => {
+                    const num = parseFloat(txt.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(num)) setCostPrice(String(num));
+                  }}
+                  size="sm"
+                  title="Speak cost price"
+                />
+              </div>
               <input
                 type="number"
                 step="0.01"
@@ -377,9 +407,19 @@ export default function ItemFormModal({ isOpen, onClose, onItemSaved, editItem =
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                {t('sellingPrice')} (₹) <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  {t('sellingPrice')} (₹) <span className="text-rose-500">*</span>
+                </label>
+                <VoiceMicButton
+                  onTranscript={(txt) => {
+                    const num = parseFloat(txt.replace(/[^0-9.]/g, ''));
+                    if (!isNaN(num)) setSellingPrice(String(num));
+                  }}
+                  size="sm"
+                  title="Speak selling price"
+                />
+              </div>
               <input
                 type="number"
                 step="0.01"

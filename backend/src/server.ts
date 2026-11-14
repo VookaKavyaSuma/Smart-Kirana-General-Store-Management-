@@ -8,6 +8,7 @@ import { itemRouter } from './routes/item.routes.js';
 import { supplierRouter } from './routes/supplier.routes.js';
 import { purchaseRouter } from './routes/purchase.routes.js';
 import { billRouter } from './routes/bill.routes.js';
+import { searchRouter } from './routes/search.routes.js';
 import { checkDatabaseConnection } from './config/db.js';
 
 dotenv.config();
@@ -56,6 +57,9 @@ app.use('/api/purchases', purchaseRouter);
 
 app.use('/api/v1/bills', billRouter);
 app.use('/api/bills', billRouter);
+
+app.use('/api/v1/search', searchRouter);
+app.use('/api/search', searchRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
