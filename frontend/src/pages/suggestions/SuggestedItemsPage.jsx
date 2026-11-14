@@ -433,3 +433,4 @@ export default function SuggestedItemsPage({ onNavigateTab }) {
     </div>
   );
 }
+

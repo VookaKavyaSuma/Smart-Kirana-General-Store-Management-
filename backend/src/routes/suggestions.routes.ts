@@ -12,3 +12,4 @@ suggestionsRouter.get('/', SuggestionsController.getSuggestions);
 
 // Get weights config
 suggestionsRouter.get('/weights', SuggestionsController.getWeights);
+

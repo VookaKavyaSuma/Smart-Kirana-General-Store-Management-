@@ -20,3 +20,4 @@ export const SUGGESTIONS_CONFIG = {
     LOW_MARGIN_PERCENT: 15.0,
   },
 };
+

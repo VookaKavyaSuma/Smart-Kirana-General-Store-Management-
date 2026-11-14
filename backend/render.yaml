@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: smart-kirana-api
+    env: node
+    plan: standard
+    buildCommand: npm install && npm run prisma:generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: FRONTEND_URL
+        value: https://your-smart-kirana.vercel.app
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: BILL_SIGN_SECRET
+        generateValue: true
+      - key: VISION_AI_PROVIDER
+        value: GEMINI
+      - key: GEMINI_API_KEY
+        sync: false
+

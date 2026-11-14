@@ -3,6 +3,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import helmet from 'helmet';
+import { generalApiLimiter } from './middlewares/rate-limit.middleware.js';
 import { authRouter } from './routes/auth.routes.js';
 import { itemRouter } from './routes/item.routes.js';
 import { supplierRouter } from './routes/supplier.routes.js';
@@ -22,6 +24,14 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Security Headers (Helmet)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false, // Managed separately or for API responses
+  })
+);
+
 // CORS configuration allowing cookies and sessions
 app.use(
   cors({
@@ -29,6 +39,9 @@ app.use(
     credentials: true,
   })
 );
+
+// General Rate Limiter on all API routes
+app.use('/api', generalApiLimiter);
 
 app.use(cookieParser());
 app.use(express.json());

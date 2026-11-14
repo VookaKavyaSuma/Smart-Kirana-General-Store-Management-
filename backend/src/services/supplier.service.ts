@@ -231,7 +231,7 @@ export class SupplierService {
       supplier = memorySuppliers.get(supplierId) || null;
     }
 
-    if (!supplier) {
+    if (!supplier || supplier.storeId !== storeId) {
       return null;
     }
 

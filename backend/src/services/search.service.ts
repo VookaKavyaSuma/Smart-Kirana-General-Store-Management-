@@ -73,10 +73,10 @@ export class SearchService {
 
     // In-memory / JS fallback fuzzy matching
     if (items.length === 0) {
-      const allItems = await ItemService.listItems(storeId);
+      const rawItems = ItemService.getRawMemoryItems().filter((i) => i.storeId === storeId);
       const scored: Array<{ item: any; score: number }> = [];
 
-      for (const item of allItems) {
+      for (const item of rawItems) {
         const result = matchScore(item.name, cleanQuery);
         if (result.matches) {
           scored.push({ item, score: result.score });
@@ -96,7 +96,7 @@ export class SearchService {
         sellingPrice: Number(s.item.currentSellingPrice),
         quantityRemaining: Number(s.item.quantityRemaining),
         quantityPurchased: Number(s.item.quantityPurchased),
-        isLowStock: Boolean(s.item.isLowStock),
+        isLowStock: Number(s.item.quantityRemaining) < 5,
       }));
     }
 
