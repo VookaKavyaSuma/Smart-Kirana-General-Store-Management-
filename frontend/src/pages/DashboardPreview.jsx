@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { itemApi, supplierApi, onlineApi } from '../services/api';
+import { itemApi, supplierApi, onlineApi, reportApi } from '../services/api';
 import {
   Store,
   LogOut,
@@ -19,6 +19,8 @@ import {
   Package,
   Users,
   Wallet,
+  CreditCard,
+  BarChart3,
 } from 'lucide-react';
 
 export default function DashboardPreview({ onNavigateTab }) {
@@ -33,6 +35,7 @@ export default function DashboardPreview({ onNavigateTab }) {
   const [itemStats, setItemStats] = useState({ totalItems: 0, lowStockCount: 0 });
   const [supplierCount, setSupplierCount] = useState(0);
   const [onlineSummary, setOnlineSummary] = useState(null);
+  const [dashboardMetrics, setDashboardMetrics] = useState(null);
 
   useEffect(() => {
     itemApi.list().then((res) => {
@@ -53,6 +56,12 @@ export default function DashboardPreview({ onNavigateTab }) {
     onlineApi.getSummary().then((res) => {
       if (res.success) {
         setOnlineSummary(res);
+      }
+    }).catch(console.warn);
+
+    reportApi.getDashboard().then((res) => {
+      if (res.success) {
+        setDashboardMetrics(res.metrics);
       }
     }).catch(console.warn);
   }, []);
@@ -151,6 +160,120 @@ export default function DashboardPreview({ onNavigateTab }) {
               <LogOut className="w-4 h-4" />
               <span>{t('logoutAll')}</span>
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 8 Core Dashboard Financial Metrics (FR-8.1, FR-8.8) */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-emerald-600" />
+            <h3 className="font-bold text-slate-900 text-base">
+              {t('financialOverview') || 'Store Financial Overview (FR-8.1, FR-8.8)'}
+            </h3>
+          </div>
+          <button
+            onClick={() => onNavigateTab('reports')}
+            className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <span>{t('navReports') || 'Detailed Reports'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Overall Cost */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {t('overallCost') || 'Overall Cost'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.overallCost || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-slate-500 mt-0.5 block">Total purchase cost</span>
+          </div>
+
+          {/* Value of Remaining Stock */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {t('stockValue') || 'Value of Stock'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.stockValue || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-slate-500 mt-0.5 block">
+              {dashboardMetrics?.quantityRemaining || 0} units left
+            </span>
+          </div>
+
+          {/* Profit Earned on Units Sold */}
+          <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
+            <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block flex items-center gap-1">
+              <TrendingUp className="w-3 h-3 text-emerald-600" />
+              {t('profitEarned') || 'Profit Earned'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-emerald-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.profitEarned || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-emerald-700 mt-0.5 block">On sold units</span>
+          </div>
+
+          {/* Expected Profit */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {t('expectedProfit') || 'Expected Profit'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.expectedProfit || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-slate-500 mt-0.5 block">On all purchased stock</span>
+          </div>
+
+          {/* Customer Credit Due */}
+          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
+            <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block flex items-center gap-1">
+              <CreditCard className="w-3 h-3 text-amber-600" />
+              {t('totalCreditDue') || 'Total Credit Due'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-amber-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.totalCreditDue || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-amber-700 mt-0.5 block">Due from customers</span>
+          </div>
+
+          {/* Remaining Online Amount */}
+          <div className="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200">
+            <span className="text-[10px] font-bold text-teal-800 uppercase tracking-wider block flex items-center gap-1">
+              <Wallet className="w-3 h-3 text-teal-600" />
+              {t('remainingOnlineAmount') || 'Online Balance'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-teal-900 mt-1 block">
+              ₹{Number(dashboardMetrics?.remainingOnlineAmount || 0).toFixed(2)}
+            </span>
+            <span className="text-[10px] text-teal-700 mt-0.5 block">Received minus paid</span>
+          </div>
+
+          {/* Total Purchased Inventory */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              Total Purchased
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+              {dashboardMetrics?.totalPurchasedUnits || 0} Units
+            </span>
+            <span className="text-[10px] text-slate-500 mt-0.5 block">{dashboardMetrics?.totalItems || 0} distinct items</span>
+          </div>
+
+          {/* Quantity Remaining */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {t('quantityRemaining') || 'Remaining Stock'}
+            </span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+              {dashboardMetrics?.quantityRemaining || 0} Units
+            </span>
+            <span className="text-[10px] text-slate-500 mt-0.5 block">Currently on shelves</span>
           </div>
         </div>
       </div>

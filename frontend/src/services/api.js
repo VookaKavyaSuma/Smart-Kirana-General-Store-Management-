@@ -484,6 +484,33 @@ export const onlineApi = {
   },
 };
 
+export const reportApi = {
+  getDashboard: () => apiRequest('/v1/reports/dashboard'),
+  getItemRankings: () => apiRequest('/v1/reports/items'),
+  getSupplierBreakdown: () => apiRequest('/v1/reports/suppliers'),
+  getMonthlyReport: (month) =>
+    apiRequest(`/v1/reports/monthly${month ? `?month=${encodeURIComponent(month)}` : ''}`),
+  getFullReport: (month) =>
+    apiRequest(`/v1/reports/full${month ? `?month=${encodeURIComponent(month)}` : ''}`),
+  downloadReportCsv: async (month) => {
+    const url = `${BASE_URL}/v1/reports/export/csv${month ? `?month=${encodeURIComponent(month)}` : ''}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) {
+      throw new Error('Failed to export profit report CSV');
+    }
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `kirana-profit-report-${month || 'all'}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
+    return true;
+  },
+};
+
 
 
 

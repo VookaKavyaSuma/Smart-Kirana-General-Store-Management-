@@ -29,8 +29,18 @@ export interface ItemRecord {
   supplierShopName?: string;
 }
 
+export interface StockAdjustmentRecord {
+  id: string;
+  itemId: string;
+  unitsChanged: number;
+  reason: string;
+  date: Date;
+  createdAt: Date;
+}
+
 // In-Memory store fallback for items
 export const memoryItems = new Map<string, ItemRecord>();
+export const memoryStockAdjustments: StockAdjustmentRecord[] = [];
 
 export class ItemService {
   /**
@@ -400,6 +410,14 @@ export class ItemService {
     if (memItem) {
       memItem.quantityRemaining = newRemaining;
       memItem.updatedAt = new Date();
+      memoryStockAdjustments.push({
+        id: crypto.randomUUID(),
+        itemId,
+        unitsChanged: -sold,
+        reason: 'QUICK_SOLD',
+        date: new Date(),
+        createdAt: new Date(),
+      });
       return {
         success: true,
         item: this.formatItemOutput(memItem, memItem.supplierShopName),
@@ -458,8 +476,17 @@ export class ItemService {
 
     const memItem = memoryItems.get(itemId);
     if (memItem) {
+      const diff = finalCount - Number(memItem.quantityRemaining);
       memItem.quantityRemaining = finalCount;
       memItem.updatedAt = new Date();
+      memoryStockAdjustments.push({
+        id: crypto.randomUUID(),
+        itemId,
+        unitsChanged: diff,
+        reason: 'MANUAL_COUNT',
+        date: new Date(),
+        createdAt: new Date(),
+      });
       return {
         success: true,
         item: this.formatItemOutput(memItem, memItem.supplierShopName),

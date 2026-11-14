@@ -278,6 +278,7 @@ model CreditEntry {
   item         Item?     @relation(fields: [itemId], references: [id], onDelete: SetNull)
 
   @@index([customerId])
+  @@index([customerId, dateTaken])
   @@map("credit_entries")
 }
 

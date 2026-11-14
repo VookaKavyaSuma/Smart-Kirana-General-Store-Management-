@@ -12,7 +12,7 @@ export interface SupplierRecord {
 }
 
 // In-Memory store fallback
-const memorySuppliers = new Map<string, SupplierRecord>();
+export const memorySuppliers = new Map<string, SupplierRecord>();
 
 export class SupplierService {
   /**

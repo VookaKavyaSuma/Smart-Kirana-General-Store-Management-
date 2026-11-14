@@ -14,6 +14,7 @@ import SettingsPage from './pages/settings/SettingsPage';
 import CustomersListPage from './pages/credit/CustomersListPage';
 import CustomerDetailPage from './pages/credit/CustomerDetailPage';
 import OnlinePaymentsPage from './pages/online/OnlinePaymentsPage';
+import ReportsPage from './pages/reports/ReportsPage';
 import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
 import { Store } from 'lucide-react';
 
@@ -126,6 +127,10 @@ function MainApp() {
 
         {currentTab === 'online' && (
           <OnlinePaymentsPage />
+        )}
+
+        {currentTab === 'reports' && (
+          <ReportsPage />
         )}
       </main>
 
