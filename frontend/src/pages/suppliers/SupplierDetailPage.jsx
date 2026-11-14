@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
-import { supplierApi } from '../../services/api';
+import { supplierApi, onlineApi } from '../../services/api';
 import {
   ArrowLeft,
   Store,
@@ -10,12 +10,14 @@ import {
   RefreshCw,
   AlertCircle,
   Plus,
+  Wallet,
 } from 'lucide-react';
 
 export default function SupplierDetailPage({ supplierId, onBack, onAddItemForSupplier }) {
   const { t } = useLanguage();
 
   const [data, setData] = useState(null);
+  const [totalPaidOnline, setTotalPaidOnline] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -23,9 +25,13 @@ export default function SupplierDetailPage({ supplierId, onBack, onAddItemForSup
     setLoading(true);
     setError('');
     try {
-      const res = await supplierApi.get(supplierId);
+      const [res, onlineRes] = await Promise.all([
+        supplierApi.get(supplierId),
+        onlineApi.getSupplierOnlineTotal(supplierId).catch(() => ({ totalPaidOnline: 0 })),
+      ]);
       if (res.success) {
         setData(res);
+        setTotalPaidOnline(onlineRes?.totalPaidOnline ?? 0);
       } else {
         setError(res.error || 'Failed to load supplier details');
       }
@@ -111,8 +117,8 @@ export default function SupplierDetailPage({ supplierId, onBack, onAddItemForSup
         )}
       </div>
 
-      {/* Financial Aggregates Banner (FR-5.7) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      {/* Financial Aggregates Banner (FR-5.7, FR-11.9) */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
             {t('totalSpent')}
@@ -122,6 +128,20 @@ export default function SupplierDetailPage({ supplierId, onBack, onAddItemForSup
           </span>
           <span className="text-[10px] text-slate-500 mt-1 block">
             Total purchase amount
+          </span>
+        </div>
+
+        {/* Total Paid Online to this Supplier (FR-11.9) */}
+        <div className="bg-sky-50/70 rounded-3xl p-5 border border-sky-200/80 shadow-xs">
+          <span className="text-[11px] font-bold text-sky-800 uppercase tracking-wider block flex items-center gap-1">
+            <Wallet className="w-3.5 h-3.5 text-sky-600" />
+            {t('totalPaidOnline') || 'Paid Online'}
+          </span>
+          <span className="text-xl sm:text-2xl font-black text-sky-900 mt-1 block">
+            ₹{Number(totalPaidOnline).toFixed(2)}
+          </span>
+          <span className="text-[10px] text-sky-700 mt-1 block">
+            Supplier online payments
           </span>
         </div>
 

@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings,
   CreditCard,
+  Wallet,
 } from 'lucide-react';
 
 export default function Navbar({
@@ -190,6 +191,18 @@ export default function Navbar({
           >
             <CreditCard className="w-4 h-4" />
             <span>{t('navCredit') || 'Credit'}</span>
+          </button>
+
+          <button
+            onClick={() => onSelectTab('online')}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              currentTab === 'online'
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Wallet className="w-4 h-4" />
+            <span>{t('navOnline') || 'Online Payments'}</span>
           </button>
 
           <button

@@ -13,6 +13,7 @@ import BillsListPage from './pages/bills/BillsListPage';
 import SettingsPage from './pages/settings/SettingsPage';
 import CustomersListPage from './pages/credit/CustomersListPage';
 import CustomerDetailPage from './pages/credit/CustomerDetailPage';
+import OnlinePaymentsPage from './pages/online/OnlinePaymentsPage';
 import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
 import { Store } from 'lucide-react';
 
@@ -121,6 +122,10 @@ function MainApp() {
             customerId={selectedCustomerId}
             onBack={() => setCurrentTab('credit')}
           />
+        )}
+
+        {currentTab === 'online' && (
+          <OnlinePaymentsPage />
         )}
       </main>
 

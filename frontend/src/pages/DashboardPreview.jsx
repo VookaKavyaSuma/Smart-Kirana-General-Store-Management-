@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import { itemApi, supplierApi } from '../services/api';
+import { itemApi, supplierApi, onlineApi } from '../services/api';
 import {
   Store,
   LogOut,
@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Package,
   Users,
+  Wallet,
 } from 'lucide-react';
 
 export default function DashboardPreview({ onNavigateTab }) {
@@ -31,6 +32,7 @@ export default function DashboardPreview({ onNavigateTab }) {
   // Quick stats
   const [itemStats, setItemStats] = useState({ totalItems: 0, lowStockCount: 0 });
   const [supplierCount, setSupplierCount] = useState(0);
+  const [onlineSummary, setOnlineSummary] = useState(null);
 
   useEffect(() => {
     itemApi.list().then((res) => {
@@ -45,6 +47,12 @@ export default function DashboardPreview({ onNavigateTab }) {
     supplierApi.list().then((res) => {
       if (res.success && res.suppliers) {
         setSupplierCount(res.suppliers.length);
+      }
+    }).catch(console.warn);
+
+    onlineApi.getSummary().then((res) => {
+      if (res.success) {
+        setOnlineSummary(res);
       }
     }).catch(console.warn);
   }, []);
@@ -80,6 +88,30 @@ export default function DashboardPreview({ onNavigateTab }) {
 
   return (
     <div className="space-y-6">
+      {/* Daily Online Entry Reminder Banner (FR-11.10) */}
+      {onlineSummary?.isTodayMissing && (
+        <div className="bg-amber-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-900 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-bold text-sm">{t('dailyReminderBanner') || 'Daily Online Entry Reminder'}</p>
+              <p className="text-xs text-amber-700 mt-0.5">
+                Today's total online amount received has not been recorded yet.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => onNavigateTab('online')}
+            className="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 cursor-pointer shadow-xs transition-colors flex items-center justify-center gap-1.5"
+          >
+            <span>{t('recordTodayEntry') || 'Record Today'}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Banner with Shop Photo (FR-12.3) */}
       <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-emerald-900/10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -123,8 +155,8 @@ export default function DashboardPreview({ onNavigateTab }) {
         </div>
       </div>
 
-      {/* Quick Action Navigation Cards (Phase 2) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Quick Action Navigation Cards (Phases 2 & 9) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Items Card */}
         <div
           onClick={() => onNavigateTab('items')}
@@ -143,7 +175,7 @@ export default function DashboardPreview({ onNavigateTab }) {
               {t('navItems')}
             </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Add items, upload photos (auto-shrunk), track cost/selling prices, and record sold stock.
+              Add items, upload photos, track cost/selling prices, and record sold stock.
             </p>
           </div>
 
@@ -163,7 +195,7 @@ export default function DashboardPreview({ onNavigateTab }) {
         {/* Suppliers Card */}
         <div
           onClick={() => onNavigateTab('suppliers')}
-          className="bg-white rounded-3xl p-6 border border-slate-200/80 hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+          className="bg-white rounded-3xl p-6 border border-slate-200/80 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -184,6 +216,38 @@ export default function DashboardPreview({ onNavigateTab }) {
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-indigo-600">
             <span>View Supplier Breakdown</span>
+            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Online Balance Card (FR-11.5, FR-11.6) */}
+        <div
+          onClick={() => onNavigateTab('online')}
+          className="bg-white rounded-3xl p-6 border border-slate-200/80 hover:border-teal-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${
+                (onlineSummary?.remainingOnlineAmount ?? 0) >= 0
+                  ? 'bg-teal-50 text-teal-800 border border-teal-200'
+                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}>
+                ₹{Number(onlineSummary?.remainingOnlineAmount ?? 0).toFixed(2)}
+              </span>
+            </div>
+            <h3 className="font-bold text-slate-900 text-lg group-hover:text-teal-700 transition-colors">
+              {t('remainingOnlineAmount') || 'Online Balance'}
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Received: ₹{Number(onlineSummary?.totalOnlineReceived ?? 0).toFixed(2)} | Paid: ₹{Number(onlineSummary?.totalOnlinePaidSuppliers ?? 0).toFixed(2)}
+            </p>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-600">
+            <span>{t('navOnline') || 'Online Payments'}</span>
             <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
           </div>
         </div>

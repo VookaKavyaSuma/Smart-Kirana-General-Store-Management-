@@ -76,7 +76,7 @@ interface InMemoryCreditPayment {
   createdAt: Date;
 }
 
-interface InMemoryOnlineTransaction {
+export interface InMemoryOnlineTransaction {
   id: string;
   storeId: string;
   creditPaymentId: string | null;

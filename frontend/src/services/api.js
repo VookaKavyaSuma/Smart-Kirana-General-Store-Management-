@@ -397,6 +397,94 @@ export const creditApi = {
     }),
 };
 
+export const onlineApi = {
+  getSummary: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    return apiRequest(`/v1/online/summary${qs ? '?' + qs : ''}`);
+  },
+
+  getDailyEntries: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    return apiRequest(`/v1/online/daily-entries${qs ? '?' + qs : ''}`);
+  },
+
+  upsertDailyEntry: (data) =>
+    apiRequest('/v1/online/daily-entries', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getTransactions: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    return apiRequest(`/v1/online/transactions${qs ? '?' + qs : ''}`);
+  },
+
+  createTransaction: (data) =>
+    apiRequest('/v1/online/transactions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getSupplierPayments: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.supplierId) query.append('supplierId', params.supplierId);
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    return apiRequest(`/v1/online/supplier-payments${qs ? '?' + qs : ''}`);
+  },
+
+  createSupplierPayment: (data) =>
+    apiRequest('/v1/online/supplier-payments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getRunningBalance: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    return apiRequest(`/v1/online/running-balance${qs ? '?' + qs : ''}`);
+  },
+
+  getSupplierOnlineTotal: (supplierId) =>
+    apiRequest(`/v1/online/supplier-total/${supplierId}`),
+
+  downloadExportCsv: async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.startDate) query.append('startDate', params.startDate);
+    if (params.endDate) query.append('endDate', params.endDate);
+    const qs = query.toString();
+    const res = await fetch(`${BASE_URL}/v1/online/export-csv${qs ? '?' + qs : ''}`, {
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      throw new Error('Failed to export online payments CSV');
+    }
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `smart-kirana-online-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
+    return true;
+  },
+};
+
+
 
 
 
