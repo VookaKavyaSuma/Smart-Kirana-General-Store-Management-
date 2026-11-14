@@ -13,6 +13,7 @@ import { settingsRouter } from './routes/settings.routes.js';
 import { creditRouter } from './routes/credit.routes.js';
 import { onlineRouter } from './routes/online.routes.js';
 import { reportRouter } from './routes/report.routes.js';
+import { suggestionsRouter } from './routes/suggestions.routes.js';
 import { checkDatabaseConnection } from './config/db.js';
 
 dotenv.config();
@@ -77,6 +78,9 @@ app.use('/api/online', onlineRouter);
 
 app.use('/api/v1/reports', reportRouter);
 app.use('/api/reports', reportRouter);
+
+app.use('/api/v1/suggestions', suggestionsRouter);
+app.use('/api/suggestions', suggestionsRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

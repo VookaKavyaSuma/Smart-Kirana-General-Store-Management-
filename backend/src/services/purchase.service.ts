@@ -43,7 +43,7 @@ export interface PurchaseRecord {
 }
 
 // In-Memory store fallback for Purchases
-const memoryPurchases = new Map<string, PurchaseRecord>();
+export const memoryPurchases = new Map<string, PurchaseRecord>();
 
 export class PurchaseService {
   /**
