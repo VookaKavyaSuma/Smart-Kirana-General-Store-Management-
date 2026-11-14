@@ -12,6 +12,7 @@ import {
   Calculator,
   Receipt,
   LogOut,
+  Settings,
 } from 'lucide-react';
 
 export default function Navbar({
@@ -28,13 +29,22 @@ export default function Navbar({
     <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-3 gap-2 sm:gap-4">
-          {/* Logo & Store Info */}
+          {/* Logo & Store Info with Shop Photo (FR-12.3) */}
           <div className="flex items-center gap-3 shrink-0">
             <div
               onClick={() => onSelectTab('dashboard')}
-              className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 cursor-pointer overflow-hidden"
+              title={store?.shopName}
             >
-              <Store className="w-5 h-5" />
+              {store?.shopPhotoUrl ? (
+                <img
+                  src={store.shopPhotoUrl}
+                  alt={store.shopName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Store className="w-5 h-5" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -62,7 +72,7 @@ export default function Navbar({
             />
           </div>
 
-          {/* Right: Calculator, Language & Logout */}
+          {/* Right: Calculator, Settings, Language & Logout */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             <button
               onClick={onOpenCalculator}
@@ -71,6 +81,19 @@ export default function Navbar({
             >
               <Calculator className="w-4 h-4 text-emerald-600" />
               <span className="hidden md:inline">{t('calculator')}</span>
+            </button>
+
+            <button
+              onClick={() => onSelectTab('settings')}
+              title={t('navSettings') || 'Settings'}
+              className={`p-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-semibold border transition-colors cursor-pointer inline-flex items-center gap-1.5 ${
+                currentTab === 'settings'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'text-slate-700 bg-slate-50 hover:bg-slate-100 border-slate-200'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="hidden md:inline">{t('navSettings') || 'Settings'}</span>
             </button>
 
             <LanguageToggle />
@@ -94,7 +117,7 @@ export default function Navbar({
           />
         </div>
 
-        {/* Navigation Tabs */}
+        {/* Navigation Tabs (FR-12.1: Settings linked from main menu on every screen) */}
         <nav className="flex items-center gap-1.5 border-t border-slate-100 py-1.5 overflow-x-auto">
           <button
             onClick={() => onSelectTab('dashboard')}
@@ -154,6 +177,18 @@ export default function Navbar({
           >
             <Users className="w-4 h-4" />
             <span>{t('navSuppliers')}</span>
+          </button>
+
+          <button
+            onClick={() => onSelectTab('settings')}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              currentTab === 'settings'
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span>{t('navSettings') || 'Settings'}</span>
           </button>
         </nav>
       </div>

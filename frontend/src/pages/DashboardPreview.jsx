@@ -80,20 +80,35 @@ export default function DashboardPreview({ onNavigateTab }) {
 
   return (
     <div className="space-y-6">
-      {/* Banner */}
+      {/* Banner with Shop Photo (FR-12.3) */}
       <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-emerald-900/10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-medium text-emerald-100 mb-2">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
-              Phase 1 & Phase 2 Active: Items & Suppliers Live
+          <div className="flex items-center gap-4">
+            {store?.shopPhotoUrl ? (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-white/40 shadow-md shrink-0 bg-white/10">
+                <img
+                  src={store.shopPhotoUrl}
+                  alt={store.shopName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center shrink-0">
+                <Store className="w-8 h-8 text-white" />
+              </div>
+            )}
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-xs text-xs font-medium text-emerald-100 mb-2">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-300" />
+                Smart Kirana Management
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                {t('welcome')}, {store?.shopName}!
+              </h2>
+              <p className="text-sm text-emerald-100 mt-1 max-w-xl">
+                Track your stock, profits, and supplier accounts. Bilingual in Telugu and English.
+              </p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              {t('welcome')}, {store?.shopName}!
-            </h2>
-            <p className="text-sm text-emerald-100 mt-1 max-w-xl">
-              Track your stock, profits, and supplier accounts. Bilingual in Telugu and English.
-            </p>
           </div>
 
           <div className="flex flex-wrap gap-2">

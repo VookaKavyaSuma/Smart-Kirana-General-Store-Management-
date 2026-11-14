@@ -25,11 +25,11 @@ export interface SessionInfo {
 }
 
 // In-Memory store fallback when PostgreSQL is not running locally
-interface InMemoryStore extends StoreProfile {
+export interface InMemoryStore extends StoreProfile {
   passwordHash: string;
 }
 
-interface InMemorySession {
+export interface InMemorySession {
   id: string;
   storeId: string;
   sessionToken: string;
@@ -40,8 +40,8 @@ interface InMemorySession {
   lastUsedAt: Date;
 }
 
-const memoryStores = new Map<string, InMemoryStore>();
-const memorySessions = new Map<string, InMemorySession>();
+export const memoryStores = new Map<string, InMemoryStore>();
+export const memorySessions = new Map<string, InMemorySession>();
 
 export class AuthService {
   /**

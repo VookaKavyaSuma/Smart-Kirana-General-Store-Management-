@@ -101,6 +101,10 @@ export function AuthProvider({ children }) {
     return { success: false, error: res.error };
   };
 
+  const updateStoreProfile = (updatedFields) => {
+    setStore((prev) => (prev ? { ...prev, ...updatedFields } : prev));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -115,6 +119,7 @@ export function AuthProvider({ children }) {
         refreshDevices,
         revokeDevice,
         checkSession,
+        updateStoreProfile,
       }}
     >
       {children}

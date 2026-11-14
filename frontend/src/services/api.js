@@ -280,5 +280,87 @@ export const searchApi = {
     }),
 };
 
+export const settingsApi = {
+  getProfile: () => apiRequest('/v1/settings/profile'),
+
+  uploadPhoto: async (formData) => {
+    const res = await fetch(`${BASE_URL}/v1/settings/photo`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to upload photo');
+    return data;
+  },
+
+  setPhotoUrl: (photoUrl) =>
+    apiRequest('/v1/settings/photo', {
+      method: 'POST',
+      body: JSON.stringify({ photoUrl }),
+    }),
+
+  removePhoto: () =>
+    apiRequest('/v1/settings/photo', {
+      method: 'DELETE',
+    }),
+
+  changePassword: (payload) =>
+    apiRequest('/v1/settings/change-password', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  updatePreferences: (payload) =>
+    apiRequest('/v1/settings/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    }),
+
+  requestChangeMobileOtp: (newMobileNumber) =>
+    apiRequest('/v1/settings/change-mobile/request-otp', {
+      method: 'POST',
+      body: JSON.stringify({ newMobileNumber }),
+    }),
+
+  verifyChangeMobileOtp: (newMobileNumber, otpCode) =>
+    apiRequest('/v1/settings/change-mobile/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ newMobileNumber, otpCode }),
+    }),
+
+  downloadExportCsv: async () => {
+    const res = await fetch(`${BASE_URL}/v1/settings/export-csv`, {
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      throw new Error('Failed to export CSV');
+    }
+    const blob = await res.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `smart-kirana-store-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(downloadUrl);
+    return true;
+  },
+
+  requestDeleteAccountOtp: (password) =>
+    apiRequest('/v1/settings/delete-account/request-otp', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+
+  confirmDeleteAccount: (password, otpCode) =>
+    apiRequest('/v1/settings/delete-account/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ password, otpCode }),
+    }),
+};
+
+
 
 

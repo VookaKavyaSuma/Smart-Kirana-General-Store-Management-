@@ -10,6 +10,7 @@ import SuppliersListPage from './pages/suppliers/SuppliersListPage';
 import SupplierDetailPage from './pages/suppliers/SupplierDetailPage';
 import PurchasesListPage from './pages/purchases/PurchasesListPage';
 import BillsListPage from './pages/bills/BillsListPage';
+import SettingsPage from './pages/settings/SettingsPage';
 import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
 import { Store } from 'lucide-react';
 
@@ -97,6 +98,10 @@ function MainApp() {
             onBack={() => setCurrentTab('suppliers')}
             onAddItemForSupplier={() => setCurrentTab('items')}
           />
+        )}
+
+        {currentTab === 'settings' && (
+          <SettingsPage onBackToDashboard={() => setCurrentTab('dashboard')} />
         )}
       </main>
 
