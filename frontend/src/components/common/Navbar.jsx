@@ -16,6 +16,7 @@ import {
   CreditCard,
   Wallet,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
 
 export default function Navbar({
@@ -216,6 +217,18 @@ export default function Navbar({
           >
             <BarChart3 className="w-4 h-4" />
             <span>{t('navReports') || 'Reports & Profit'}</span>
+          </button>
+
+          <button
+            onClick={() => onSelectTab('suggestions')}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              currentTab === 'suggestions'
+                ? 'bg-emerald-600 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{t('navSuggestions') || 'Suggested Items'}</span>
           </button>
 
           <button

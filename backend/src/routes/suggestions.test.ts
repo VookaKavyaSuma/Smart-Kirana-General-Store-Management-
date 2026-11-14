@@ -235,23 +235,29 @@ describe('Smart Kirana - Phase 11: Suggested Items & 3 Lists (FR-9)', () => {
   });
 
   it('identifies the cheapest supplier when item is bought from multiple suppliers (FR-9.6)', async () => {
-    // Create Sunflower Oil item with default Wholesaler A @ CP 130
-    const oilRes = await ItemService.createItem(storeId, {
-      name: 'Sunflower Oil (నూనె)',
-      category: 'Edible Oils',
-      unit: 'LITRE',
-      costPrice: 130,
-      sellingPrice: 150,
-      quantity: 20,
+    // 1. First purchase for Sunflower Oil from Wholesaler A @ CP 130
+    const purA = await PurchaseService.createPurchase(storeId, {
+      supplierId: supplierAId,
       supplierShopName: 'Wholesaler A',
+      purchaseDate: new Date('2026-10-01'),
+      items: [
+        {
+          name: 'Sunflower Oil (నూనె)',
+          category: 'Edible Oils',
+          unit: 'LITRE',
+          quantity: 20,
+          costPrice: 130,
+          sellingPrice: 150,
+        },
+      ],
     });
-    const oilId = oilRes.item.id;
+    const oilId = purA.purchase.items[0].itemId;
 
-    // Now record a purchase for this same oil from Wholesaler B @ CP 120 (Cheaper!)
+    // 2. Second purchase for same oil from Wholesaler B @ CP 120 (Cheaper!)
     await PurchaseService.createPurchase(storeId, {
       supplierId: supplierBId,
       supplierShopName: 'Wholesaler B',
-      purchaseDate: new Date(),
+      purchaseDate: new Date('2026-10-15'),
       items: [
         {
           itemId: oilId,

@@ -15,6 +15,7 @@ import CustomersListPage from './pages/credit/CustomersListPage';
 import CustomerDetailPage from './pages/credit/CustomerDetailPage';
 import OnlinePaymentsPage from './pages/online/OnlinePaymentsPage';
 import ReportsPage from './pages/reports/ReportsPage';
+import SuggestedItemsPage from './pages/suggestions/SuggestedItemsPage';
 import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
 import { Store } from 'lucide-react';
 
@@ -131,6 +132,10 @@ function MainApp() {
 
         {currentTab === 'reports' && (
           <ReportsPage />
+        )}
+
+        {currentTab === 'suggestions' && (
+          <SuggestedItemsPage onNavigateTab={(tab) => setCurrentTab(tab)} />
         )}
       </main>
 

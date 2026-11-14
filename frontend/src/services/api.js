@@ -511,6 +511,12 @@ export const reportApi = {
   },
 };
 
+export const suggestionsApi = {
+  getSuggestions: (period = 'last_30_days') =>
+    apiRequest(`/v1/suggestions?period=${encodeURIComponent(period)}`),
+  getWeights: () => apiRequest('/v1/suggestions/weights'),
+};
+
 
 
 
