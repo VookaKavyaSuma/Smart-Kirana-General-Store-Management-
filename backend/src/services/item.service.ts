@@ -30,7 +30,7 @@ export interface ItemRecord {
 }
 
 // In-Memory store fallback for items
-const memoryItems = new Map<string, ItemRecord>();
+export const memoryItems = new Map<string, ItemRecord>();
 
 export class ItemService {
   /**

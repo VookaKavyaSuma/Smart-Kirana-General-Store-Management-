@@ -29,3 +29,4 @@ settingsRouter.get('/export-csv', SettingsController.exportCsv);
 // Account Deletion with Password & OTP (FR-12.10)
 settingsRouter.post('/delete-account/request-otp', SettingsController.requestDeleteAccountOtp);
 settingsRouter.post('/delete-account/confirm', SettingsController.confirmDeleteAccount);
+

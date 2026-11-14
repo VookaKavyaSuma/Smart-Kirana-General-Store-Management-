@@ -10,6 +10,7 @@ import { purchaseRouter } from './routes/purchase.routes.js';
 import { billRouter } from './routes/bill.routes.js';
 import { searchRouter } from './routes/search.routes.js';
 import { settingsRouter } from './routes/settings.routes.js';
+import { creditRouter } from './routes/credit.routes.js';
 import { checkDatabaseConnection } from './config/db.js';
 
 dotenv.config();
@@ -65,6 +66,9 @@ app.use('/api/search', searchRouter);
 
 app.use('/api/v1/settings', settingsRouter);
 app.use('/api/settings', settingsRouter);
+
+app.use('/api/v1/credit', creditRouter);
+app.use('/api/credit', creditRouter);
 
 // Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

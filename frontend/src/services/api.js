@@ -361,6 +361,43 @@ export const settingsApi = {
     }),
 };
 
+export const creditApi = {
+  listCustomers: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.filter) query.append('filter', params.filter);
+    if (params.sort) query.append('sort', params.sort);
+    if (params.search) query.append('search', params.search);
+    const qs = query.toString();
+    return apiRequest(`/v1/credit${qs ? '?' + qs : ''}`);
+  },
+
+  getCustomer: (id) => apiRequest(`/v1/credit/${id}`),
+
+  createCustomer: (data) =>
+    apiRequest('/v1/credit', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  addCreditEntry: (customerId, data) =>
+    apiRequest(`/v1/credit/${customerId}/entries`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deleteCreditEntry: (customerId, entryId) =>
+    apiRequest(`/v1/credit/${customerId}/entries/${entryId}`, {
+      method: 'DELETE',
+    }),
+
+  recordPayment: (customerId, data) =>
+    apiRequest(`/v1/credit/${customerId}/payments`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+};
+
+
 
 
 

@@ -936,3 +936,4 @@ export default function SettingsPage({ onBackToDashboard }) {
     </div>
   );
 }
+

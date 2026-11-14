@@ -11,14 +11,17 @@ import SupplierDetailPage from './pages/suppliers/SupplierDetailPage';
 import PurchasesListPage from './pages/purchases/PurchasesListPage';
 import BillsListPage from './pages/bills/BillsListPage';
 import SettingsPage from './pages/settings/SettingsPage';
+import CustomersListPage from './pages/credit/CustomersListPage';
+import CustomerDetailPage from './pages/credit/CustomerDetailPage';
 import PriceCalculatorModal from './components/conversion/PriceCalculatorModal';
 import { Store } from 'lucide-react';
 
 function MainApp() {
   const { store, loading } = useAuth();
   const [authView, setAuthView] = useState('login'); // 'login' | 'register'
-  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard' | 'items' | 'purchases' | 'suppliers' | 'supplier-detail'
+  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard' | 'items' | 'purchases' | 'suppliers' | 'supplier-detail' | 'credit' | 'customer-detail' | 'settings'
   const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
 
   // Conversion calculator modal state (FR-4)
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -102,6 +105,22 @@ function MainApp() {
 
         {currentTab === 'settings' && (
           <SettingsPage onBackToDashboard={() => setCurrentTab('dashboard')} />
+        )}
+
+        {currentTab === 'credit' && (
+          <CustomersListPage
+            onSelectCustomer={(customerId) => {
+              setSelectedCustomerId(customerId);
+              setCurrentTab('customer-detail');
+            }}
+          />
+        )}
+
+        {currentTab === 'customer-detail' && (
+          <CustomerDetailPage
+            customerId={selectedCustomerId}
+            onBack={() => setCurrentTab('credit')}
+          />
         )}
       </main>
 
