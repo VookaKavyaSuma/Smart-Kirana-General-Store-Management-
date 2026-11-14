@@ -15,5 +15,7 @@ billRouter.get('/', BillController.listBills);
 billRouter.post('/upload', uploadBillMiddleware.single('billFile'), BillController.uploadBill);
 billRouter.get('/:id', BillController.getBillById);
 billRouter.get('/:id/signed-url', BillController.getSignedUrl);
+billRouter.post('/:id/read', BillController.readBill);
+billRouter.post('/:id/confirm', BillController.confirmBill);
 billRouter.delete('/:id', BillController.deleteBill);
 

@@ -217,6 +217,17 @@ export const billApi = {
   getSignedUrl: (id, mode = 'view') =>
     apiRequest(`/v1/bills/${id}/signed-url?mode=${mode}`),
 
+  read: (id) =>
+    apiRequest(`/v1/bills/${id}/read`, {
+      method: 'POST',
+    }),
+
+  confirm: (id, reviewData) =>
+    apiRequest(`/v1/bills/${id}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(reviewData),
+    }),
+
   upload: async (formData) => {
     const BASE_URL = import.meta.env.VITE_API_URL || '/api';
     const res = await fetch(`${BASE_URL}/v1/bills/upload`, {

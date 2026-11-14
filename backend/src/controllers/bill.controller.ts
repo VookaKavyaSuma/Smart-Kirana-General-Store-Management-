@@ -124,6 +124,49 @@ export class BillController {
   }
 
   /**
+   * Automatically read bill file via Vision AI or Tesseract fallback (FR-6.4, FR-6.9)
+   * Read each bill only once and cache the result!
+   */
+  static async readBill(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const storeId = req.store?.id;
+    const { id } = req.params;
+
+    if (!storeId) {
+      res.status(401).json({ success: false, error: 'Unauthorized' });
+      return;
+    }
+
+    const result = await BillService.readBill(storeId, id);
+    if (!result.success) {
+      res.status(404).json(result);
+      return;
+    }
+
+    res.json(result);
+  }
+
+  /**
+   * Confirm bill review and commit stock and purchase (FR-6.5, FR-6.6, FR-6.7)
+   */
+  static async confirmBill(req: AuthenticatedRequest, res: Response): Promise<void> {
+    const storeId = req.store?.id;
+    const { id } = req.params;
+
+    if (!storeId) {
+      res.status(401).json({ success: false, error: 'Unauthorized' });
+      return;
+    }
+
+    const result = await BillService.confirmBill(storeId, id, req.body);
+    if (!result.success) {
+      res.status(400).json(result);
+      return;
+    }
+
+    res.json(result);
+  }
+
+  /**
    * Delete bill
    */
   static async deleteBill(req: AuthenticatedRequest, res: Response): Promise<void> {

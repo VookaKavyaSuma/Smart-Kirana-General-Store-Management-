@@ -40,3 +40,7 @@ frontend/.env
 uploads/
 backend/uploads/
 
+# OCR language training caches
+*.traineddata
+backend/*.traineddata
+

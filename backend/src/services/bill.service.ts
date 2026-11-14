@@ -2,6 +2,10 @@ import crypto from 'crypto';
 import path from 'path';
 import { prisma, getDatabaseStatus } from '../config/db.js';
 import { storageService } from './storage.service.js';
+import { billReaderService } from './bill-reader/composite-bill-reader.service.js';
+import { checkBillTotalDiscrepancy } from '../schemas/bill-extraction.schema.js';
+import { ItemService } from './item.service.js';
+import { PurchaseService } from './purchase.service.js';
 
 export interface BillRecord {
   id: string;
@@ -15,6 +19,7 @@ export interface BillRecord {
   billDate: Date;
   supplierName: string | null;
   totalAmount: number | null;
+  extractedData?: any | null;
   status: 'PENDING_REVIEW' | 'CONFIRMED' | 'FAILED';
   createdAt: Date;
   updatedAt: Date;
@@ -103,6 +108,7 @@ export class BillService {
         billDate: finalDate,
         supplierName: metadata.supplierName?.trim() || 'No supplier',
         totalAmount: amount,
+        extractedData: null,
         status: 'PENDING_REVIEW',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -173,6 +179,7 @@ export class BillService {
           billDate: b.billDate,
           supplierName: b.supplierName || 'No supplier',
           totalAmount: b.totalAmount ? Number(b.totalAmount) : null,
+          extractedData: b.extractedData,
           status: b.status,
           createdAt: b.createdAt,
         }));
@@ -269,6 +276,224 @@ export class BillService {
       filePath: bill.filePath,
       fileType: bill.fileType,
       fileName: path.basename(bill.filePath),
+    };
+  }
+
+  /**
+   * Automatically read bill file via Vision AI or Tesseract fallback (FR-6.4, FR-6.9)
+   * Read each bill only once and cache the result!
+   */
+  static async readBill(
+    storeId: string,
+    billId: string
+  ): Promise<{
+    success: boolean;
+    billId: string;
+    extractedData?: any;
+    discrepancy?: any;
+    cached: boolean;
+    error?: string;
+  }> {
+    const bill = await this.getBillById(storeId, billId);
+    if (!bill) {
+      return { success: false, billId, cached: false, error: 'Bill file not found' };
+    }
+
+    // 1. If already cached, return immediately without re-reading! (FR-6.4 caching)
+    if (bill.extractedData) {
+      const discrepancy = checkBillTotalDiscrepancy(
+        bill.extractedData.lineItems || [],
+        bill.extractedData.billTotal
+      );
+      return {
+        success: true,
+        billId,
+        extractedData: bill.extractedData,
+        discrepancy,
+        cached: true,
+      };
+    }
+
+    // 2. Perform OCR / Vision AI reading
+    const readResult = await billReaderService.readBillWithDetails(bill.filePath, bill.fileType);
+
+    // 3. Match line items to existing store items by name (FR-6.7)
+    let existingItems: any[] = [];
+    try {
+      existingItems = await ItemService.listItems(storeId);
+    } catch (err: any) {
+      console.warn('Could not fetch existing items for linking:', err.message);
+    }
+
+    const linkedLineItems = (readResult.data.lineItems || []).map((line) => {
+      const match = existingItems.find(
+        (i) => i.name.trim().toLowerCase() === line.name.trim().toLowerCase()
+      );
+      if (match) {
+        return {
+          ...line,
+          existingItemId: match.id,
+          existingItemName: match.name,
+          sellingPrice: line.sellingPrice || match.currentSellingPrice,
+          isNewItem: false,
+        };
+      }
+      return {
+        ...line,
+        existingItemId: null,
+        sellingPrice: line.sellingPrice || Math.round(line.costPrice * 1.2 * 100) / 100,
+        isNewItem: true,
+      };
+    });
+
+    const finalExtracted = {
+      ...readResult.data,
+      supplierShopName: readResult.data.supplierShopName || bill.supplierName || null,
+      billNumber: readResult.data.billNumber || bill.billNumber || null,
+      billDate: readResult.data.billDate || (bill.billDate ? new Date(bill.billDate).toISOString().split('T')[0] : null),
+      billTotal: readResult.data.billTotal != null ? readResult.data.billTotal : bill.totalAmount,
+      lineItems: linkedLineItems,
+    };
+
+    // 4. Cache extracted data on the bill record in DB and memory
+    if (getDatabaseStatus()) {
+      try {
+        await prisma.billFile.update({
+          where: { id: billId },
+          data: {
+            extractedData: finalExtracted as any,
+            supplierName: finalExtracted.supplierShopName || bill.supplierName,
+            billNumber: finalExtracted.billNumber || bill.billNumber,
+            totalAmount: finalExtracted.billTotal != null ? finalExtracted.billTotal : bill.totalAmount,
+          },
+        });
+      } catch (err: any) {
+        console.error('Prisma cache extractedData error:', err.message);
+      }
+    }
+
+    const mem = memoryBills.get(billId);
+    if (mem) {
+      mem.extractedData = finalExtracted;
+      if (finalExtracted.supplierShopName) mem.supplierName = finalExtracted.supplierShopName;
+      if (finalExtracted.billNumber) mem.billNumber = finalExtracted.billNumber;
+      if (finalExtracted.billTotal != null) mem.totalAmount = finalExtracted.billTotal;
+    }
+
+    const discrepancy = checkBillTotalDiscrepancy(
+      finalExtracted.lineItems,
+      finalExtracted.billTotal
+    );
+
+    return {
+      success: true,
+      billId,
+      extractedData: finalExtracted,
+      discrepancy,
+      cached: false,
+    };
+  }
+
+  /**
+   * Confirm bill review screen and apply changes to stock and purchases (FR-6.5, FR-6.6, FR-6.7)
+   * Nothing changes stock until the user presses Confirm!
+   */
+  static async confirmBill(
+    storeId: string,
+    billId: string,
+    reviewData: {
+      supplierShopName?: string | null;
+      billNumber?: string | null;
+      billDate?: string | Date;
+      billTotal?: number | null;
+      lineItems: Array<{
+        name: string;
+        quantity: number;
+        unit: any;
+        costPrice: number;
+        sellingPrice?: number;
+        existingItemId?: string | null;
+      }>;
+    }
+  ): Promise<{ success: boolean; purchase?: any; error?: string }> {
+    const bill = await this.getBillById(storeId, billId);
+    if (!bill) {
+      return { success: false, error: 'Bill file not found' };
+    }
+
+    if (!reviewData.lineItems || reviewData.lineItems.length === 0) {
+      return { success: false, error: 'Cannot confirm bill without any item lines. Please enter at least one item.' };
+    }
+
+    // 1. Resolve Supplier (FR-6.6: creates supplier if missing)
+    const supplierShopName = reviewData.supplierShopName?.trim() || bill.supplierName || 'No supplier';
+
+    // 2. Prepare purchase lines
+    const purchaseLines = reviewData.lineItems.map((line) => ({
+      name: line.name.trim(),
+      itemId: line.existingItemId || undefined,
+      quantity: Number(line.quantity),
+      unit: line.unit,
+      costPrice: Number(line.costPrice),
+      sellingPrice: Number(line.sellingPrice || line.costPrice * 1.2),
+      category: 'General Stores',
+    }));
+
+    // 3. Create the purchase and add quantities to stock (FR-6.6: using bill date as purchase date)
+    const purchaseRes = await PurchaseService.createPurchase(storeId, {
+      supplierShopName,
+      purchaseDate: reviewData.billDate || bill.billDate,
+      type: bill.billType,
+      note: reviewData.billNumber ? `Bill #${reviewData.billNumber}` : (bill.billNumber ? `Bill #${bill.billNumber}` : null),
+      items: purchaseLines,
+    });
+
+    if (!purchaseRes.success || !purchaseRes.purchase) {
+      return { success: false, error: purchaseRes.error || 'Failed to create purchase from confirmed bill.' };
+    }
+
+    // 4. Update bill record: mark CONFIRMED and link purchaseId
+    const confirmedDate = reviewData.billDate ? new Date(reviewData.billDate) : new Date(bill.billDate);
+    const confirmedTotal = reviewData.billTotal != null ? Number(reviewData.billTotal) : Number(purchaseRes.purchase.totalAmount);
+
+    if (getDatabaseStatus()) {
+      try {
+        await prisma.billFile.update({
+          where: { id: billId },
+          data: {
+            status: 'CONFIRMED',
+            supplierName: supplierShopName,
+            billNumber: reviewData.billNumber || bill.billNumber,
+            billDate: confirmedDate,
+            totalAmount: confirmedTotal,
+            extractedData: reviewData as any,
+          },
+        });
+
+        // Link purchase.billFileId to this bill
+        await prisma.purchase.update({
+          where: { id: purchaseRes.purchase.id },
+          data: { billFileId: billId },
+        });
+      } catch (err: any) {
+        console.error('Prisma confirmBill status update error:', err.message);
+      }
+    }
+
+    const mem = memoryBills.get(billId);
+    if (mem) {
+      mem.status = 'CONFIRMED';
+      mem.purchaseId = purchaseRes.purchase.id;
+      mem.supplierName = supplierShopName;
+      mem.billNumber = reviewData.billNumber || bill.billNumber;
+      mem.billDate = confirmedDate;
+      mem.totalAmount = confirmedTotal;
+      mem.extractedData = reviewData;
+    }
+
+    return {
+      success: true,
+      purchase: purchaseRes.purchase,
     };
   }
 
