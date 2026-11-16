@@ -170,8 +170,9 @@ export default function SettingsPage({ onBackToDashboard }) {
   const handleSavePreferences = async (newLang = language, newThreshold = lowStockLimit, newReminder = dailyReminder) => {
     setPrefLoading(true);
     try {
+      const resolvedLang = (newLang || language || store?.language || 'en').toString().toUpperCase();
       const res = await settingsApi.updatePreferences({
-        language: newLang.toUpperCase(),
+        language: resolvedLang === 'TE' ? 'TE' : 'EN',
         lowStockThreshold: Number(newThreshold),
         dailyReminderEnabled: Boolean(newReminder),
       });

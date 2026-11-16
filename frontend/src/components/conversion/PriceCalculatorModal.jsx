@@ -59,10 +59,10 @@ export default function PriceCalculatorModal({ isOpen, onClose, initialItem = nu
   const subLabel = isLitre ? 'ml' : 'g';
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-start p-4 pt-5 sm:pt-6 pb-12 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 mb-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden my-auto flex flex-col max-h-[88vh] sm:max-h-[90vh] animate-in fade-in zoom-in-95">
         {/* Header */}
-        <div className="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+        <div className="shrink-0 bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
               <Calculator className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function PriceCalculatorModal({ isOpen, onClose, initialItem = nu
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-5">
+        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1 overscroll-contain">
           {/* Selling Price & Unit Input */}
           <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
             <div className="flex-1">
@@ -350,6 +350,20 @@ export default function PriceCalculatorModal({ isOpen, onClose, initialItem = nu
               </div>
             </div>
           )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="shrink-0 px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <span className="font-semibold text-slate-500 text-[11px]">
+            {initialItem ? `${initialItem.name} • SP ₹${sellingPrice}/${baseLabel}` : `1 ${baseLabel} = ₹${sellingPrice}`}
+          </span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-colors cursor-pointer text-xs"
+          >
+            {t('close') || 'Close'}
+          </button>
         </div>
       </div>
     </div>

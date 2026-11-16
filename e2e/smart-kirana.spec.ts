@@ -42,6 +42,9 @@ test.describe('Smart Kirana - End-to-End Test Suite (Phase 12)', () => {
   test('1. Register new store and login with case-insensitive username (FR-1.1 to FR-1.6)', async ({ page }) => {
     await page.context().clearCookies();
     await page.goto('/');
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.waitForTimeout(600);
 
     // Switch to Register form if on Login
     const regSwitch = page.locator('button:has-text("ఖాతా లేదా"), button:has-text("Register your shop"), button:has-text("No account yet")').first();
@@ -266,7 +269,7 @@ test.describe('Smart Kirana - End-to-End Test Suite (Phase 12)', () => {
     await expect(modal).not.toBeVisible({ timeout: 8000 });
 
     // Verify purchase appears in the list
-    await expect(page.getByText('Local Dairy Farm').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('tbody, div.bg-white').getByText('Local Dairy Farm').first()).toBeVisible({ timeout: 8000 });
   });
 
   test('7. Bill Upload & Review (FR-6.1 to FR-6.9)', async ({ page }) => {

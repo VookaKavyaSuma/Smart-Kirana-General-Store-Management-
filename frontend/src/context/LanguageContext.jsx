@@ -24,7 +24,15 @@ export function LanguageProvider({ children }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ lang, switchLanguage, t }}>
+    <LanguageContext.Provider
+      value={{
+        lang,
+        language: lang,
+        switchLanguage,
+        setLanguage: switchLanguage,
+        t,
+      }}
+    >
       {children}
     </LanguageContext.Provider>
   );
