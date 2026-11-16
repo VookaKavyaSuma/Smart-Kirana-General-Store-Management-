@@ -16,7 +16,7 @@ import { creditRouter } from './routes/credit.routes.js';
 import { onlineRouter } from './routes/online.routes.js';
 import { reportRouter } from './routes/report.routes.js';
 import { suggestionsRouter } from './routes/suggestions.routes.js';
-import { checkDatabaseConnection } from './config/db.js';
+import { checkDatabaseConnection, getDatabaseStatus } from './config/db.js';
 
 dotenv.config();
 
@@ -72,6 +72,9 @@ app.get('/api/health', (_req, res) => {
   res.json({
     status: 'OK',
     service: 'Smart Kirana Store Management API',
+    database: getDatabaseStatus()
+      ? 'PostgreSQL (Supabase/Prisma Connected)'
+      : 'In-Memory Fallback (Database Not Connected)',
     version: '1.3.0',
     time: new Date().toISOString(),
   });
