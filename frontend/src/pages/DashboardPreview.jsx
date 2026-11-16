@@ -353,11 +353,10 @@ export default function DashboardPreview({ onNavigateTab }) {
               <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
                 <Wallet className="w-6 h-6" />
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${
-                (onlineSummary?.remainingOnlineAmount ?? 0) >= 0
+              <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold ${(onlineSummary?.remainingOnlineAmount ?? 0) >= 0
                   ? 'bg-teal-50 text-teal-800 border border-teal-200'
                   : 'bg-rose-50 text-rose-800 border border-rose-200'
-              }`}>
+                }`}>
                 ₹{Number(onlineSummary?.remainingOnlineAmount ?? 0).toFixed(2)}
               </span>
             </div>
@@ -404,11 +403,10 @@ export default function DashboardPreview({ onNavigateTab }) {
               {activeDevices.map((dev) => (
                 <div
                   key={dev.id}
-                  className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                    dev.isCurrentDevice
+                  className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${dev.isCurrentDevice
                       ? 'bg-emerald-50/50 border-emerald-200'
                       : 'bg-slate-50/50 border-slate-200'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
@@ -477,20 +475,6 @@ export default function DashboardPreview({ onNavigateTab }) {
                 </span>
               </div>
             </div>
-          </div>
-
-          <div className="bg-emerald-50/60 rounded-3xl p-6 border border-emerald-200/70 text-xs text-emerald-900">
-            <h4 className="font-bold mb-2 flex items-center gap-1.5 text-emerald-800">
-              <CheckCircle className="w-4 h-4 text-emerald-600" />
-              Phase 2 Features Active
-            </h4>
-            <ul className="space-y-1.5 text-emerald-800 list-disc list-inside">
-              <li>Item CRUD with Telugu & English names</li>
-              <li>In-browser image shrinker before upload</li>
-              <li>Auto supplier filing / 'No supplier' option</li>
-              <li>Live profit per unit ($SP - CP$) & margin %</li>
-              <li>Supplier metrics & total profit breakdown</li>
-            </ul>
           </div>
         </div>
       </div>
