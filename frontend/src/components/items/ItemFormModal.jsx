@@ -23,6 +23,7 @@ const COMMON_CATEGORIES = [
   'Tea & Beverages',
   'Dairy & Eggs',
   'General Stores',
+  'Flours',
 ];
 
 const UNITS = [
